@@ -28,11 +28,15 @@ class BurgerBuilder extends Component {
         loading:false,
         error:false
     }
+    componentWillReceiveProps(){
+        this.setState({ingredients:this.props.location.state});
+    }
 
     componentDidMount(){
+        
         Axios.get('/ingredients.json')
         .then((resp)=>{
-            this.setState({ingredients:resp.data})
+            this.setState({ingredients:resp.data});
         }).catch((e)=>{
             this.setState({error:true});
         })
@@ -89,30 +93,40 @@ class BurgerBuilder extends Component {
     }
 
     purchaseContinueHandler = () => {
-        this.setState({loading:true});
-        const order={
-            ingredients:this.state.ingredients,
-            price:this.state.totalPrice,
-            customer:{
-                name:"soma",
-                address:{
-                    street:"test",
-                    zipcode:"1212",
-                    country:"india"
-                },
-                email:"test@tetst.com",
-                deliverymethod:"fastest"
-            }
-
+        let queryParams=[];
+        for(let i in this.state.ingredients){
+            queryParams.push(encodeURIComponent(i)+"="+encodeURIComponent(this.state.ingredients[i]));
         }
-        Axios.post('/orders.json',order)
-        .then(resp=>{
-            this.setState({loading:false,purchasing:false});
-        })
-        .catch(e=>{
-            this.setState({loading:false,purchasing:false});
-            console.log(e);
-        })
+        queryParams=queryParams.join('&');
+        this.props.history.push({
+            pathname:'/checkout',
+            search:"?"+queryParams
+        });
+
+        // this.setState({loading:true});
+        // const order={
+        //     ingredients:this.state.ingredients,
+        //     price:this.state.totalPrice,
+        //     customer:{
+        //         name:"soma",
+        //         address:{
+        //             street:"test",
+        //             zipcode:"1212",
+        //             country:"india"
+        //         },
+        //         email:"test@tetst.com",
+        //         deliverymethod:"fastest"
+        //     }
+
+        // }
+        // Axios.post('/orders.json',order)
+        // .then(resp=>{
+        //     this.setState({loading:false,purchasing:false});
+        // })
+        // .catch(e=>{
+        //     this.setState({loading:false,purchasing:false});
+        //     console.log(e);
+        // })
 
         //alert('You continue!');
     }
